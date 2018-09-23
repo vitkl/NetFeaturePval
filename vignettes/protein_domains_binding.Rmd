@@ -1,0 +1,83 @@
+---
+title: "Predict protein domains likely to mediate binding"
+author: "Vitalii Kleshchevnikov"
+date: "23/09/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(NetFeaturePval)
+```
+
+## Load example dataset
+
+These are interactions of viral and human proteins along with protein domain annotations. The aim of the analysis is to predict domains in human proteins likely to bind viral proteins. More details and be found in a paper.
+
+```{r}
+data = fread("../data/viral_human_net_w_domains", sep = "\t", stringsAsFactors = F)
+```
+
+## Find enriched domains
+
+First, let's use multi-core parallelisation. Correct analysis would require many more premutations but this is just an example of how to use this package.
+
+```{r parallel}
+res = permutationPval(interactions2permute = IDs_interactor_viral ~ IDs_interactor_human,
+                      associations2test = IDs_interactor_viral ~ IDs_domain_human,
+                      # node_attr gives a way to add columns needed to compute statistic and filter the data,
+                      # in this case only domain_count is needed to filter 
+                      # and node columns to compute statistic
+                      node_attr = list(IDs_interactor_viral ~ IDs_interactor_viral_degree,
+                                       IDs_domain_human ~ domain_count,
+                                       IDs_interactor_viral + IDs_domain_human ~ domain_frequency_per_IDs_interactor_viral), 
+                      data = data,
+                      # in this example statistic is just count of 
+                      # IDs_interactor_human for each IDs_interactor_viral / IDs_domain_human pair
+                      statistic = IDs_interactor_viral + IDs_domain_human ~ .N,
+                      select_nodes = IDs_domain_human ~ domain_count >= 1,
+                      N = 30, # number of permutations
+                      cores = 3, # how many cores to use on a local machine
+                      # computations are split into inner and outer replicate 
+                      # to help manage memory load, here it is 50*2
+                      # hint: you can use microbenchmark package to find optimal value
+                      split_comp_inner_N = 2, 
+                      seed = 2) # seed for reproducible sampling (permutations)
+```
+
+Next, let's try multi-node parallelisation (on a computing cluster). Default installation of clustermq will still work but run multiple processes on a local machine.
+
+```{r cluster_mq}
+res = permutationPval(interactions2permute = IDs_interactor_viral ~ IDs_interactor_human,
+                      associations2test = IDs_interactor_viral ~ IDs_domain_human,
+                      node_attr = list(IDs_domain_human ~ domain_count),
+                      data = data,
+                      statistic = IDs_interactor_viral + IDs_domain_human ~ .N,
+                      select_nodes = IDs_domain_human ~ domain_count >= 1,
+                      N = 30, 
+                      clustermq = T, # use clustermq
+                      clustermq_jobs = 3, # how many cluster jobs to start 
+                      # how much memory each job needs
+                      clustermq_mem = 2000, 
+                      # caution: allocating more memory than needed is a waste of resources,
+                      # but allocating not enough will result in you jobs being killed,
+                      # in turn, this will freese R requiring restart
+                      # hint: try 2-3 jobs with realistic load and excess of memory
+                      split_comp_inner_N = 2, seed = 2)
+```
+
+## Look at the results and p-value distribution
+
+```{r p_vals}
+res
+plot(res)
+```
+
+# Date and packages used
+
+```{r}
+Sys.Date. = Sys.Date()
+Sys.Date.
+session_info. = devtools::session_info()
+session_info.
+```
