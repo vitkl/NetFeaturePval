@@ -22,7 +22,7 @@ permutationPval(interactions2permute = nodeX ~ nodeY,
 
 \item{data}{data.table containing interaction data and attributes}
 
-\item{statistic}{formula that specifies how to calculate statistic using attibutes from \code{node_attr} by node \code{X} in \code{interactions2permute} and \code{Z} in \code{associations2test}, details: \code{\link[MItools]{permutationPvalHelper}}. In data.table synthax: \code{DT[, (observed/permuted)statistic := eval(right-hand-side of formula), by = .(eval(column names in the left-hand-side of formula))]}}
+\item{statistic}{formula that specifies how to calculate statistic using attibutes from \code{node_attr} by node \code{X} in \code{interactions2permute} and \code{Z} in \code{associations2test}, details: \code{\link[NetFeaturePval]{permutationPvalHelper}}. In data.table synthax: \code{DT[, (observed/permuted)statistic := eval(right-hand-side of formula), by = .(eval(column names in the left-hand-side of formula))]}}
 
 \item{select_nodes}{formula or list of formulas specifying which nodes of specific node type to select before permutation based on condition (\code{X} ~ \code{degree} > \code{10})}
 
@@ -36,7 +36,7 @@ permutationPval(interactions2permute = nodeX ~ nodeY,
 
 \item{also_permuteYZ}{logical, permute Y-Z interactions in addition to X-Y (specified in interactions2permute) ?}
 
-\item{clustermq}{if TRUE uses clustermq job scheduling (\code{\link[clustermq]{Q}}) instead of local parallelisation (\code{\link[MItools]{parReplicate}})  = F,  = 4000,  = 100, clustermq_template = list(), split_comp_inner_N}
+\item{clustermq}{if TRUE uses clustermq job scheduling (\code{\link[clustermq]{Q}}) instead of local parallelisation (\code{\link[NetFeaturePval]{parReplicate}})  = F,  = 4000,  = 100, clustermq_template = list(), split_comp_inner_N}
 
 \item{clustermq_mem}{memory in MB to allocate for each job (ignored unless clustermq == TRUE)}
 

@@ -18,6 +18,18 @@ These are interactions of viral and human proteins along with protein domain ann
 data = fread("../data/viral_human_net_w_domains", sep = "\t", stringsAsFactors = F)
 ```
 
+library(igraph)
+
+prot2domain = as_adjacency_matrix(graph.data.frame(unique(data[, .(IDs_interactor_human, IDs_domain_human)])))
+prot2domain = prot2domain[rownames(prot2domain) %in% data$IDs_interactor_human,
+                          colnames(prot2domain) %in% data$IDs_domain_human]
+
+viral2human = as_adjacency_matrix(graph.data.frame(unique(data[, .(IDs_interactor_viral, IDs_interactor_human)])))
+viral2human = viral2human[rownames(viral2human) %in% data$IDs_interactor_viral,
+                          colnames(viral2human) %in% data$IDs_interactor_human]
+
+viral2human %*% prot2domain
+
 ## Find enriched domains
 
 First, let's use multi-core parallelisation. Correct analysis would require many more premutations but this is just an example of how to use this package.
@@ -36,12 +48,12 @@ res = permutationPval(interactions2permute = IDs_interactor_viral ~ IDs_interact
                       # IDs_interactor_human for each IDs_interactor_viral / IDs_domain_human pair
                       statistic = IDs_interactor_viral + IDs_domain_human ~ .N,
                       select_nodes = IDs_domain_human ~ domain_count >= 1,
-                      N = 30, # number of permutations
-                      cores = 3, # how many cores to use on a local machine
+                      N = 1, # number of permutations
+                      cores = 1, # how many cores to use on a local machine
                       # computations are split into inner and outer replicate 
                       # to help manage memory load, here it is 50*2
                       # hint: you can use microbenchmark package to find optimal value
-                      split_comp_inner_N = 2, 
+                      split_comp_inner_N = 1, 
                       seed = 2) # seed for reproducible sampling (permutations)
 ```
 

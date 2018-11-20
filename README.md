@@ -4,6 +4,11 @@
 This package lets you find features (node Z) of nodes (node Y) that all interact with one node (node X), this is repeated for all nodes in the network and done using a single function call:   
 
 ```r
+# Install:
+install.packages("devtools")
+devtools::install_github("vitkl/NetFeaturePval", dependencies = T)
+
+# Run analysis
 res = permutationPval(interactions2permute = nodeX ~ nodeY,
   associations2test = nodeX ~ nodeZ, node_attr = NULL,
   data, statistic = nodeX + nodeZ ~ .N, select_nodes = NULL, N = 1000,

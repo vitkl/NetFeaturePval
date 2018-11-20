@@ -4,14 +4,14 @@
 ##' @param associations2test formula specifying columns that contain X-Z correspondence: empirical p-values for the association of X with Z will be tested, NOTE: Y-Z interactions are assumed
 ##' @param node_attr formula or list of formulas specifying columns that contain attributes of \code{X}, \code{Y} or \code{Z} or their combination (\code{X} ~ \code{degree}, \code{X} + \code{Z} ~ \code{pvalue})
 ##' @param data data.table containing interaction data and attributes
-##' @param statistic formula that specifies how to calculate statistic using attibutes from \code{node_attr} by node \code{X} in \code{interactions2permute} and \code{Z} in \code{associations2test}, details: \code{\link[MItools]{permutationPvalHelper}}. In data.table synthax: \code{DT[, (observed/permuted)statistic := eval(right-hand-side of formula), by = .(eval(column names in the left-hand-side of formula))]}
+##' @param statistic formula that specifies how to calculate statistic using attibutes from \code{node_attr} by node \code{X} in \code{interactions2permute} and \code{Z} in \code{associations2test}, details: \code{\link[NetFeaturePval]{permutationPvalHelper}}. In data.table synthax: \code{DT[, (observed/permuted)statistic := eval(right-hand-side of formula), by = .(eval(column names in the left-hand-side of formula))]}
 ##' @param select_nodes formula or list of formulas specifying which nodes of specific node type to select before permutation based on condition (\code{X} ~ \code{degree} > \code{10})
 ##' @param N number of times to run permutation of PPI network
 ##' @param cores specify how many cores to use for parallel processing, default (NULL) is to detect all cores on the machine and use all minus one. When using LSF cluster you must specify the number of cores to use because \code{\link[parallel]{detectCores}} doen't know how much cores you have requested from LSF (with bsub -n) and detects all cores on the actual physical node.
 ##' @param cluster_type Type of the cluster to create when using R parrallel (\code{\link[parallel]{clusterApply}}). Type "FORK" means cluster nodes share objects in memory. Details: (\code{\link[parallel]{makeCluster}})
 ##' @param seed seed for RNG for reproducible sampling
 ##' @param also_permuteYZ logical, permute Y-Z interactions in addition to X-Y (specified in interactions2permute) ?
-##' @param clustermq if TRUE uses clustermq job scheduling (\code{\link[clustermq]{Q}}) instead of local parallelisation (\code{\link[MItools]{parReplicate}})  = F,  = 4000,  = 100, clustermq_template = list(), split_comp_inner_N
+##' @param clustermq if TRUE uses clustermq job scheduling (\code{\link[clustermq]{Q}}) instead of local parallelisation (\code{\link[NetFeaturePval]{parReplicate}})  = F,  = 4000,  = 100, clustermq_template = list(), split_comp_inner_N
 ##' @param clustermq_mem memory in MB to allocate for each job (ignored unless clustermq == TRUE)
 ##' @param clustermq_jobs maximal number of computing cluster jobs to use (ignored unless clustermq == TRUE)
 ##' @param clustermq_template Add specific arguments to computing cluster job submission call. Not needed in most cases. Details: \code{\link[clustermq]{Q}} (ignored unless clustermq == TRUE)
@@ -120,7 +120,7 @@ permutationPval = function(interactions2permute = nodeX ~ nodeY, associations2te
     cl <- makeCluster(cores, type = cluster_type)
     if(cluster_type != "FORK"){
       # get library support needed to run the code
-      clusterEvalQ(cl, {library(MItools); library(data.table); library(parallel)})
+      clusterEvalQ(cl, {library(NetFeaturePval); library(data.table); library(parallel)})
       # put objects in place that might be needed for the code
       clusterExport(cl, c("data_list", "by_cols", "exprs", "nodes", "nodes_call", "includeAssociations", "also_permuteYZ", "inner_N"), envir=environment())
     }
@@ -133,15 +133,15 @@ permutationPval = function(interactions2permute = nodeX ~ nodeY, associations2te
       # inner replicate
       temp_inner = replicate(n = inner_N, expr = {
         # calculate statistic using permuted network
-        data_list = MItools:::calcPermutedStatistic(data_list, by_cols, exprs,
+        data_list = NetFeaturePval:::calcPermutedStatistic(data_list, by_cols, exprs,
                                                     nodes, nodes_call,
                                                     includeAssociations, also_permuteYZ)
         # count how many times observed statistic is lower than permuted statistic giving us the empirical probability of observing value as high or higher by chance
-        data_list_temp = MItools:::observedVSpermuted(data_list, nodes_call, nodes)
+        data_list_temp = NetFeaturePval:::observedVSpermuted(data_list, nodes_call, nodes)
       }, simplify = FALSE)
       # end of inner replicate
       # aggregate attributes across permutations
-      MItools:::aggregatePermutations(temp_inner, nodes, nodes_call)
+      NetFeaturePval:::aggregatePermutations(temp_inner, nodes, nodes_call)
     }, simplify = FALSE, USE.NAMES = TRUE)
     # end of outer replicate
     stopCluster(cl)
@@ -152,13 +152,13 @@ permutationPval = function(interactions2permute = nodeX ~ nodeY, associations2te
       # inner replicate
       temp_inner = replicate(n = inner_N, expr = {
         # calculate statistic using permuted network
-        data_list = MItools:::calcPermutedStatistic(data_list, by_cols, exprs, nodes, nodes_call, includeAssociations, also_permuteYZ)
+        data_list = NetFeaturePval:::calcPermutedStatistic(data_list, by_cols, exprs, nodes, nodes_call, includeAssociations, also_permuteYZ)
         # count how many times observed is lower than permuted giving us the empirical probability of observing value as high or higher by chance
-        data_list_temp = MItools:::observedVSpermuted(data_list, nodes_call, nodes)
+        data_list_temp = NetFeaturePval:::observedVSpermuted(data_list, nodes_call, nodes)
       }, simplify = FALSE)
       # end of inner replicate
       # aggregate attributes across permutations
-      MItools:::aggregatePermutations(temp_inner, nodes, nodes_call)
+      NetFeaturePval:::aggregatePermutations(temp_inner, nodes, nodes_call)
     }, 1:outer_N,
     export = list(data_list = data_list, by_cols = by_cols,
                   exprs = exprs, nodes = nodes, nodes_call = nodes_call,
