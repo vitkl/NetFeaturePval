@@ -21,11 +21,9 @@
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
-
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
+<script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
 
 
@@ -34,7 +32,6 @@
 
 <meta property="og:description" content="calculate permutation pval for association between X and Z if both are connected to Y" />
 <meta name="twitter:card" content="summary" />
-
 
 
 <!-- mathjax -->
@@ -145,7 +142,7 @@
     </tr>
     <tr>
       <th>statistic</th>
-      <td><p>formula that specifies how to calculate statistic using attibutes from <code>node_attr</code> by node <code>X</code> in <code>interactions2permute</code> and <code>Z</code> in <code>associations2test</code>, details: <code><a href='http://www.rdocumentation.org/packages/MItools/topics/permutationPvalHelper'>permutationPvalHelper</a></code>. In data.table synthax: <code>DT[, (observed/permuted)statistic := eval(right-hand-side of formula), by = .(eval(column names in the left-hand-side of formula))]</code></p></td>
+      <td><p>formula that specifies how to calculate statistic using attibutes from <code>node_attr</code> by node <code>X</code> in <code>interactions2permute</code> and <code>Z</code> in <code>associations2test</code>, details: <code><a href='permutationPvalHelper.html'>permutationPvalHelper</a></code>. In data.table synthax: <code>DT[, (observed/permuted)statistic := eval(right-hand-side of formula), by = .(eval(column names in the left-hand-side of formula))]</code></p></td>
     </tr>
     <tr>
       <th>select_nodes</th>
@@ -173,7 +170,7 @@
     </tr>
     <tr>
       <th>clustermq</th>
-      <td><p>if TRUE uses clustermq job scheduling (<code><a href='http://www.rdocumentation.org/packages/clustermq/topics/Q'>Q</a></code>) instead of local parallelisation (<code><a href='http://www.rdocumentation.org/packages/MItools/topics/parReplicate'>parReplicate</a></code>)  = F,  = 4000,  = 100, clustermq_template = list(), split_comp_inner_N</p></td>
+      <td><p>if TRUE uses clustermq job scheduling (<code><a href='http://www.rdocumentation.org/packages/clustermq/topics/Q'>Q</a></code>) instead of local parallelisation (<code><a href='parReplicate.html'>parReplicate</a></code>)  = F,  = 4000,  = 100, clustermq_template = list(), split_comp_inner_N</p></td>
     </tr>
     <tr>
       <th>clustermq_mem</th>
